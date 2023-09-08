@@ -13,6 +13,6 @@ file(
 )
 
 install(FILES ${HELLOTRIANGLE_INC} DESTINATION include/assignment1_helloTriangle)
-add_executable(assignment1_helloTriangle ${HELLOTRIANGLE_SRC} ${HELLOTRIANGLE_INC} ${HELLOTRIANGLE_ASSETS})
+add_executable(assignment1_helloTriangle ${HELLOTRIANGLE_SRC} ${HELLOTRIANGLE_INC} ${HELLOTRIANGLE_ASSETS} "Functions.h" "Functions.cpp")
 target_link_libraries(assignment1_helloTriangle PUBLIC core IMGUI)
 target_include_directories(assignment1_helloTriangle PUBLIC ${CORE_INC_DIR} ${stb_INCLUDE_DIR})
