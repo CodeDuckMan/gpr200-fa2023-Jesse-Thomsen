@@ -30,6 +30,7 @@ unsigned int createVAO(float* vertexData, int arrayLength, int numVertices)
 
 unsigned int createShader(GLenum shaderType, const char* sourceCode) 
 {
+
 	//Create a new vertex shader object
 	unsigned int shaderTemp = glCreateShader(shaderType);
 	//Supply the shader object with source code
