@@ -77,6 +77,13 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
 		glBindVertexArray(vao);
+		//The current time in seconds this frame
+		float time = (float)glfwGetTime();
+		//Get the location of the uniform by name
+		int timeLocation = glGetUniformLocation(shaderProgram, "_Time");
+		//Set the value of the variable at the location
+		glUniform1f(timeLocation, time);
+		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);
