@@ -1,8 +1,8 @@
 #pragma once
 #include <sstream>
 #include <fstream>
-#include <C:\Users\jesse\OneDrive\Desktop\Repositories\gpr200-fa2023-Jesse-Thomsen\core\ew\external\glad.h>
-#include <C:\Users\jesse\OneDrive\Desktop\Repositories\gpr200-fa2023-Jesse-Thomsen\core\ew\ewMath\ewMath.h>
+#include "../ew/external/glad.h"
+#include "../ew/ewMath/ewMath.h"
 
 namespace jesseT {
 	std::string loadShaderSourceFromFile(const std::string& filePath);
