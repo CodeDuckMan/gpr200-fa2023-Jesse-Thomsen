@@ -61,12 +61,12 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	std::string vertexShaderSource = jesseT::loadShaderSourceFromFile("assets / vertexShader.vert");
-	std::string fragmentShaderSource = jesseT::loadShaderSourceFromFile("assets / fragmentShaderSource.frag");
+	std::string vertexShaderSource = jesseT::loadShaderSourceFromFile("assets/vertexShader.vert");
+	std::string fragmentShaderSource = jesseT::loadShaderSourceFromFile("assets/fragmentShaderSource.frag");
 
 	jesseT::Shader shader (vertexShaderSource.c_str(), fragmentShaderSource.c_str());
 	
-	unsigned int vao = createVAO(vertices, 3);
+	unsigned int vao = createVAO(vertices, 6);
 
 
 	shader.use();
@@ -80,9 +80,10 @@ int main() {
 
 		//Set uniforms
 		shader.setFloat("_MyFloat", *vertices);
-		shader.setVec2("_MyVec2", *triangleColor, triangleBrightness);
+		shader.setVec3("_Color", triangleColor[0], triangleColor[1], triangleColor[2]);
+		shader.setFloat("_Brightness", triangleBrightness);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		//Render UI
 		{
