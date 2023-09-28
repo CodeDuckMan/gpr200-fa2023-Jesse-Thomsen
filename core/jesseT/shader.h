@@ -2,7 +2,6 @@
 #include <sstream>
 #include <fstream>
 #include "../ew/external/glad.h"
-#include "../ew/ewMath/ewMath.h"
 
 namespace jesseT {
 	std::string loadShaderSourceFromFile(const std::string& filePath);

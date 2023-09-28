@@ -66,7 +66,7 @@ int main() {
 
 	jesseT::Shader shader (vertexShaderSource.c_str(), fragmentShaderSource.c_str());
 	
-	unsigned int vao = createVAO(vertices, 6);
+	unsigned int vao = createVAO(vertices, 12);
 
 
 	shader.use();
