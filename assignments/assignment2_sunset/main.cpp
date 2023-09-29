@@ -12,22 +12,33 @@
 
 unsigned int createShader(GLenum shaderType, const char* sourceCode);
 unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource);
-unsigned int createVAO(float* vertexData, int numVertices);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-float vertices[18] = {
-	//x   //y  //z   
+struct Vertex {
+	float x, y, z;
+	float u, v;
+};
+
+unsigned int createVAO(Vertex* vertexData, int numVertices, unsigned int* indicesData, int numIndices);
+
+
+Vertex vertices[4] = {
+	//x   //y  //z   //u   //v
 	//triangle 1
-	-0.5, -0.5, 0.0,
-	 0.5, 0.5, 0.0,
-	-0.5,  0.5, 0.0
-	 //triangle 2
-	-0.5, -0.5, 0.0,
-	 0.5, 0.0, 0.0,
-	 0.5,  0.5, 0.0
+	{-0.5, -0.5, 0.0, 0.0, 0.0},
+	{ 0.5, -0.5, 0.0, 1.0, 1.0},
+	{-0.5,  0.5, 0.0, 1.0, 1.0},
+	{ 0.5,  0.5, 0.0, 0.0, 1.0}
+};
+
+
+
+unsigned int indicies[6] = {
+	0, 1, 2, // triangle 1
+	0, 3, 2, // triangle 22
 };
 
 
@@ -61,17 +72,18 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	std::string vertexShaderSource = jesseT::loadShaderSourceFromFile("assets/vertexShader.vert");
-	std::string fragmentShaderSource = jesseT::loadShaderSourceFromFile("assets/fragmentShaderSource.frag");
 
-	jesseT::Shader shader (vertexShaderSource.c_str(), fragmentShaderSource.c_str());
+	jesseT::Shader shader ("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	
-	unsigned int vao = createVAO(vertices, 12);
+	unsigned int vao = createVAO(vertices, 4, indicies, 6);
 
 
 	shader.use();
 
 	glBindVertexArray(vao);
+
+	//Wireframe
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -79,11 +91,11 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Set uniforms
-		shader.setFloat("_MyFloat", *vertices);
+
 		shader.setVec3("_Color", triangleColor[0], triangleColor[1], triangleColor[2]);
 		shader.setFloat("_Brightness", triangleBrightness);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
 		//Render UI
 		{
@@ -111,10 +123,15 @@ int main() {
 
 
 
-unsigned int createVAO(float* vertexData, int numVertices) {
+unsigned int createVAO(Vertex* vertexData, int numVertices, unsigned int* indicesData, int numIndices) {
 	unsigned int vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+
+	unsigned int ebo;
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numIndices, indicesData, GL_STATIC_DRAW);
 
 	//Define a new buffer id
 	unsigned int vbo;
@@ -123,9 +140,13 @@ unsigned int createVAO(float* vertexData, int numVertices) {
 	//Allocate space for + send vertex data to GPU.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * numVertices * 3, vertexData, GL_STATIC_DRAW);
 
-	//Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
+	//Position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, x));
 	glEnableVertexAttribArray(0);
+
+	//UV
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(offsetof(Vertex, u)));
+	glEnableVertexAttribArray(1);
 
 	return vao;
 }
