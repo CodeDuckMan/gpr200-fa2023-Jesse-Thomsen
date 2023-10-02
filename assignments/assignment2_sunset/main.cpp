@@ -29,16 +29,16 @@ Vertex vertices[4] = {
 	//x   //y  //z   //u   //v
 	//triangle 1
 	{-0.5, -0.5, 0.0, 0.0, 0.0},
-	{ 0.5, -0.5, 0.0, 1.0, 1.0},
-	{-0.5,  0.5, 0.0, 1.0, 1.0},
-	{ 0.5,  0.5, 0.0, 0.0, 1.0}
+	{ 0.5, -0.5, 0.0, 1.0, 0.0},
+	{ 0.5,  0.5, 0.0, 1.0, 1.0},
+	{ -0.5,  0.5, 0.0, 0.0, 1.0}
 };
 
 
 
 unsigned int indicies[6] = {
 	0, 1, 2, // triangle 1
-	0, 3, 2, // triangle 22
+	0, 2, 3, // triangle 22
 };
 
 
@@ -138,7 +138,7 @@ unsigned int createVAO(Vertex* vertexData, int numVertices, unsigned int* indice
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	//Allocate space for + send vertex data to GPU.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * numVertices * 3, vertexData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * numVertices * sizeof(vertices), vertexData, GL_STATIC_DRAW);
 
 	//Position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, x));
