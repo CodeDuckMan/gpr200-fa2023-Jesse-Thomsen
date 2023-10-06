@@ -11,6 +11,8 @@
 #include <ew/shader.h>
 #include <ew/ewMath/vec3.h>
 #include <ew/procGen.h>
+#include "../core/jesseT/transformations.h"
+
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
@@ -53,6 +55,25 @@ int main() {
 
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	
+	//Transforms
+	const int numTransforms = 4;
+	jesseT::Transform transform1;
+	transform1.position = { -0.5, 0.5, 0.0 };
+
+	jesseT::Transform transform2;
+	transform2.position = { 0.5, 0.5, 0.0 };
+
+	jesseT::Transform transform3;
+	transform3.position = { -0.5, -0.5, 0.0 };
+
+	jesseT::Transform transform4;
+	transform4.position = { 0.5, -0.5, 0.0 };
+
+	jesseT::Transform transform[numTransforms]{
+		{transform1}, {transform2},
+		{transform3}, {transform4},
+	};
+
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
 	
@@ -64,6 +85,13 @@ int main() {
 
 		//Set uniforms
 		shader.use();
+		for (size_t i = 0; i < numTransforms; i++)
+		{
+		shader.setMat4("_Model", transform[i].getModelMatrix());
+		cubeMesh.draw();
+
+		}
+
 
 		//TODO: Set model matrix uniform
 
@@ -74,9 +102,18 @@ int main() {
 			ImGui_ImplGlfw_NewFrame();
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui::NewFrame();
+			for (size_t i = 0; i < numTransforms; i++)
+			{
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader("Transform ")) {
+					ImGui::DragFloat3("Position", &transform[i].position.x, 0.05f);
+					ImGui::DragFloat3("Rotation", &transform[i].rotation.x, 1.0f);
+					ImGui::DragFloat3("Scale", &transform[i].scale.x, 0.05f);
+				}
+				ImGui::PopID();
 
-			ImGui::Begin("Transform");
-			ImGui::End();
+			}
+
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

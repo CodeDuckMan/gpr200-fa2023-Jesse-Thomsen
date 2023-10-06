@@ -21,6 +21,7 @@ namespace jesseT {
 		void setVec3(const std::string& name, float x, float y, float z) const;
 		void setVec4(const std::string& name, float x, float y, float z, float w) const;
 
+		void setMat4(const std::string& name, const ew::Mat4& m) const;
 
 
 	private:
