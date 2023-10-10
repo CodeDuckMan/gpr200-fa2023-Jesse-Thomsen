@@ -13,12 +13,12 @@
 #include <ew/transform.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-
+                          
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-const int NUM_CUBES = 4;
+const int NUM_CUBES = 5;
 ew::Transform cubeTransforms[NUM_CUBES];
 
 int main() {
@@ -65,6 +65,9 @@ int main() {
 		cubeTransforms[i].position.x = i % (NUM_CUBES / 2) - 0.5;
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
+
+	//norm p-e
+	//projection needs screen H&W
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
