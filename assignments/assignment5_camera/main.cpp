@@ -66,6 +66,9 @@ int main() {
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
 
+	//Camera creation
+	//jesseT::Camera camera;
+
 	//norm p-e
 	//projection needs screen H&W
 
@@ -75,6 +78,7 @@ int main() {
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		
 		//Set uniforms
 		shader.use();
 
@@ -85,6 +89,8 @@ int main() {
 			shader.setMat4("_Model", cubeTransforms[i].getModelMatrix());
 			cubeMesh.draw();
 		}
+
+		//shader.setMat4("_View", );
 
 		//Render UI
 		{
