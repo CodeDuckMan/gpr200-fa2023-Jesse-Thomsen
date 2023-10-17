@@ -82,23 +82,23 @@ namespace jesseT {
 	};
 	//Orthographic projection
 	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far) {
-		int r = (height * aspect) / 2;
-		int t = height / 2;
-		int l = -r;
-		int b = -t;
+		float r = (height * aspect) / 2;
+		float t = height / 2;
+		float l = -r;
+		float b = -t;
 		
 		return ew::Mat4(
-			2/(r-l), 0, 0, -(r+l)/(r-l),
-			0, 2/(t-b), 0, -(t+b)/(t-b),
-			0, 0, -2 * (far - near), -(far + near) / (far - near),
-			0, 0, 0, 1
+			(float)2/((float)r- (float)l), (float)0, (float)0, -((float)r+ (float)l)/((float)r- (float)l),
+			(float)0, (float)2/((float)t- (float)b), (float)0, -((float)t+ (float)b)/((float)t- (float)b),
+			(float)0, (float)0, (float)-2 * ((float)far - (float)near), -((float)far + (float)near) / ((float)far - (float)near),
+			(float)0, (float)0, (float)0, (float)1
 		);
 	};
 	//Perspective projection
 	//fov = vertical aspect ratio (radians) 90?
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
 		return ew::Mat4(
-			1/tan(fov/2)* aspect, 0, 0, 0,
+			1/(tan(fov/2)* aspect), 0, 0, 0,
 			0,(1 / tan(fov / 2)),  0, 0,
 			0, 0, (near + far) / (near - far), (2 * far * near) / (near - far),
 			0, 0, -1, 0

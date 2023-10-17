@@ -11,6 +11,8 @@
 #include <ew/shader.h>
 #include <ew/procGen.h>
 #include <ew/transform.h>
+#include <../core/jesseT/camera.h>
+#include <../core/jesseT/transformations.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
                           
@@ -18,7 +20,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-const int NUM_CUBES = 5;
+const int NUM_CUBES = 4;
 ew::Transform cubeTransforms[NUM_CUBES];
 
 int main() {
@@ -67,10 +69,24 @@ int main() {
 	}
 
 	//Camera creation
-	//jesseT::Camera camera;
+	// clamp(x, a, b) { return min(max(x,a), b)
 
 	//norm p-e
 	//projection needs screen H&W
+
+		//shader.setMat4("_View", );
+		// Camera
+
+		jesseT::Camera theCamera;
+		theCamera.position = ew::Vec3(0.0, 0.0, 0.5);
+		theCamera.target = ew::Vec3(0.0, 0.0, 0.0);
+		theCamera.fov = 60.0;
+		theCamera.aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+		theCamera.nearPlane = 0.1;
+		theCamera.farPlane = 100.0;
+		theCamera.orthographic = false;
+		theCamera.orthoSize = 6.0;
+
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -90,7 +106,14 @@ int main() {
 			cubeMesh.draw();
 		}
 
-		//shader.setMat4("_View", );
+		//Camera
+		shader.setMat4("_View", theCamera.ViewMatrix());
+		shader.setMat4("_Projection", theCamera.ProjectionMatrix());
+
+		//Camera Movement
+		{
+
+		}
 
 		//Render UI
 		{
@@ -111,11 +134,20 @@ int main() {
 				ImGui::PopID();
 			}
 			ImGui::Text("Camera");
+			ImGui::DragFloat3("Position", &theCamera.position.x, 0.05f);
+			ImGui::DragFloat3("Target", &theCamera.target.x, 0.05f);
+			ImGui::DragFloat("FOV", &theCamera.fov, 0.05f);
+			ImGui::Checkbox("Orthographic", &theCamera.orthographic);
+			ImGui::DragFloat("Ortho Height", &theCamera.orthoSize, 0.05f);
+			ImGui::DragFloat("Near Plane", &theCamera.nearPlane, 0.05f);
+			ImGui::DragFloat("Far Plane", &theCamera.farPlane, 0.05f);
+
 			ImGui::End();
 			
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
+
 
 		glfwSwapBuffers(window);
 	}
