@@ -4,7 +4,8 @@
 #include "../ew/ewMath/vec3.h"
 #include "../jesseT/transformations.h"
 namespace jesseT {
-	struct Camera {
+	struct Camera 
+	{
 		ew::Vec3 position = ew::Vec3(0.0, 0.0, 0.5); //Camera body position
 		ew::Vec3 target = ew::Vec3(0.0, 0.0, 0.0); //Position to look at
 		ew::Vec3 up = ew::Vec3(0.0, 1.0, 0.0);
@@ -24,8 +25,19 @@ namespace jesseT {
 			}
 			else
 			{
-				return jesseT::Perspective(fov, aspectRatio, nearPlane, farPlane);
+				return jesseT::Perspective(ew::Radians(fov), aspectRatio, nearPlane, farPlane);
 			}
 		};
+	};
+	//Camera aiming variables
+	struct CameraControls 
+	{
+		double prevMouseX, prevMouseY;
+		float yaw = 0, pitch = 0;
+		float mouseSensitivity = 0.1f;
+		bool firstMouse = true;
+		float moveSpeed = 5.0f;
+		float initialMoveSpeed = 5.0f;
+		float shiftMoveSpeed = 10.0f;
 	};
 }

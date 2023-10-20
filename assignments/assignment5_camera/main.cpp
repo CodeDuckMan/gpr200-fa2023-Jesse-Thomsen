@@ -15,6 +15,101 @@
 #include <../core/jesseT/transformations.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+
+void clamp(float maxNum, float minNum, float &x) {
+	if (x < minNum)
+	{
+		x = minNum;
+	}
+	if (x > maxNum)
+	{
+		x = maxNum;
+	}
+
+}
+
+// Move Camera
+void moveCamera(GLFWwindow* window, jesseT::Camera* camera, jesseT::CameraControls* controls, float deltaTime) {
+	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+		//Release cursor
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		controls->firstMouse = true;
+		return;
+	}
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	//Get screen mouse position this frame
+	double mouseX, mouseY;
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+
+	//If we just started right clicking, set prevMouse values to current position.
+	//This prevents a bug where the camera moves as soon as we click.
+	if (controls->firstMouse) {
+		controls->firstMouse = false;
+		controls->prevMouseX = mouseX;
+		controls->prevMouseY = mouseY;
+	}
+
+	// Get mouse position delta for this frame
+	controls->pitch += mouseY - controls->prevMouseY;//Y
+	controls->yaw += mouseX - controls->prevMouseX;	//X
+		
+	clamp(89, -89, controls->pitch);
+	
+	//Remember previous mouse position
+	controls->prevMouseX = mouseX;
+	controls->prevMouseY = mouseY;
+
+	//Construct Forward Vector
+	ew::Vec3 forward = ew::Vec3(
+	( sin(ew::Radians(controls->yaw)) * cos(ew::Radians(controls->pitch))),
+	( -sin(ew::Radians(controls->pitch))),
+	( -cos(ew::Radians(controls->yaw)) * cos(ew::Radians(controls->pitch)))
+	);
+
+	// Get Right and Up
+	
+	ew::Vec3 right = ew::Normalize( ew::Cross(forward, ew::Vec3(0,1,0)));
+	ew::Vec3 up = ew::Normalize( ew::Cross(right, forward));
+
+	// Keyboard inputs
+
+	controls->moveSpeed = controls->initialMoveSpeed * deltaTime;
+
+	//increase speed
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) {
+		controls->moveSpeed = controls->shiftMoveSpeed * deltaTime;
+	}
+	//forward
+	if (glfwGetKey(window, GLFW_KEY_W)) {
+		camera->position += forward * controls->moveSpeed;
+	}
+	//left
+	if (glfwGetKey(window, GLFW_KEY_A)) {
+		camera->position += right * -controls->moveSpeed;
+	}
+	//back
+	if (glfwGetKey(window, GLFW_KEY_S)) {
+		camera->position += forward * -controls->moveSpeed;
+	}
+	//right
+	if (glfwGetKey(window, GLFW_KEY_D)) {
+		camera->position += right * controls->moveSpeed;
+	}
+	//up
+	if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+		camera->position += up * controls->moveSpeed;
+	}
+	//down
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) {
+		camera->position += up * -controls->moveSpeed;
+	}
+
+	// Set Camera Position & Target
+
+	camera->target = camera->position + forward;
+};
+
                           
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
@@ -74,22 +169,35 @@ int main() {
 	//norm p-e
 	//projection needs screen H&W
 
-		//shader.setMat4("_View", );
-		// Camera
 
-		jesseT::Camera theCamera;
-		theCamera.position = ew::Vec3(0.0, 0.0, 0.5);
-		theCamera.target = ew::Vec3(0.0, 0.0, 0.0);
-		theCamera.fov = 60.0;
-		theCamera.aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
-		theCamera.nearPlane = 0.1;
-		theCamera.farPlane = 100.0;
-		theCamera.orthographic = false;
-		theCamera.orthoSize = 6.0;
+	// Camera
 
+
+	jesseT::Camera theCamera;
+	theCamera.position = ew::Vec3(0.0, 0.0, 5.0);
+	theCamera.target = ew::Vec3(0.0, 0.0, 0.0);
+	theCamera.fov = 60.0;
+	theCamera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
+	theCamera.nearPlane = 0.1;
+	theCamera.farPlane = 100.0;
+	theCamera.orthographic = false;
+	theCamera.orthoSize = 6.0;
+
+	// Camera controls
+	jesseT::CameraControls cameraControls;
+
+	// Time
+	float prevTime = 0;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+
+		//Calc Time
+		float time = (float)glfwGetTime(); //Timestamp of current frame
+		float deltaTime = time - prevTime;
+		prevTime = time;
+
+		moveCamera(window, &theCamera, &cameraControls, deltaTime);
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -123,7 +231,7 @@ int main() {
 
 			ImGui::Begin("Settings");
 			ImGui::Text("Cubes");
-			for (size_t i = 0; i < NUM_CUBES; i++)
+			for (int i = 0; i < NUM_CUBES; i++)
 			{
 				ImGui::PushID(i);
 				if (ImGui::CollapsingHeader("Transform")) {
@@ -141,6 +249,22 @@ int main() {
 			ImGui::DragFloat("Ortho Height", &theCamera.orthoSize, 0.05f);
 			ImGui::DragFloat("Near Plane", &theCamera.nearPlane, 0.05f);
 			ImGui::DragFloat("Far Plane", &theCamera.farPlane, 0.05f);
+			if (ImGui::Button("Reset")) {
+
+				theCamera.position = ew::Vec3(0.0, 0.0, 5.0);
+				theCamera.target = ew::Vec3(0.0, 0.0, 0.0);
+				theCamera.fov = 60.0;
+				theCamera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
+				theCamera.nearPlane = 0.1;
+				theCamera.farPlane = 100.0;
+				theCamera.orthographic = false;
+				theCamera.orthoSize = 6.0;
+
+				cameraControls.pitch = 0;
+				cameraControls.yaw = 0;
+
+
+			}
 
 			ImGui::End();
 			

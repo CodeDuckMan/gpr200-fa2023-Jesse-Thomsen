@@ -88,10 +88,10 @@ namespace jesseT {
 		float b = -t;
 		
 		return ew::Mat4(
-			(float)2/((float)r- (float)l), (float)0, (float)0, -((float)r+ (float)l)/((float)r- (float)l),
-			(float)0, (float)2/((float)t- (float)b), (float)0, -((float)t+ (float)b)/((float)t- (float)b),
-			(float)0, (float)0, (float)-2 * ((float)far - (float)near), -((float)far + (float)near) / ((float)far - (float)near),
-			(float)0, (float)0, (float)0, (float)1
+			2/(r - l), 0, 0, -(r + l)/(r - l),
+			0, 2/(t- b), 0, -(t + b)/(t - b),
+			0, 0, -2 / (far - near), -(far + near) / (far - near),
+			0, 0, 0, 1
 		);
 	};
 	//Perspective projection
