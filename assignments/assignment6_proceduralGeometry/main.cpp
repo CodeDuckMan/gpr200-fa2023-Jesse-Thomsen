@@ -14,6 +14,7 @@
 #include <ew/transform.h>
 #include <ew/camera.h>
 #include <ew/cameraController.h>
+#include <jesseT/procGen.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void resetCamera(ew::Camera& camera, ew::CameraController& cameraController);
@@ -82,8 +83,16 @@ int main() {
 	ew::MeshData cubeMeshData = ew::createCube(0.5f);
 	ew::Mesh cubeMesh(cubeMeshData);
 
+	//Create plane
+	ew::MeshData planeMeshData = jesseT::createPlane(5.0, 10);
+	ew::Mesh planeMesh(planeMeshData);
+
 	//Initialize transforms
 	ew::Transform cubeTransform;
+
+	ew::Transform planeTransform;
+	planeTransform.position = ew::Vec3(1.0f, 0.0f, 0.0f);
+
 
 	resetCamera(camera,cameraController);
 
@@ -120,6 +129,11 @@ int main() {
 		//Draw cube
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
 		cubeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
+		//Draw Plane
+		shader.setMat4("_Model", planeTransform.getModelMatrix());
+		planeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
 
 		//Render UI
 		{
