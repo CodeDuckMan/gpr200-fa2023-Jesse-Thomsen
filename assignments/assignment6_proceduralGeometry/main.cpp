@@ -84,8 +84,17 @@ int main() {
 	ew::Mesh cubeMesh(cubeMeshData);
 
 	//Create plane
-	ew::MeshData planeMeshData = jesseT::createPlane(5.0, 10);
+	double planeSize = 2.0;
+	int planeNumSubdivisions = 5;
+	ew::MeshData planeMeshData = jesseT::createPlane(planeSize, planeNumSubdivisions);
 	ew::Mesh planeMesh(planeMeshData);
+
+	//Create Cylinder
+	float cylinderRadius = 1.0;
+	float cylinderHeight = 2.0;
+	int cylinderNumSegments = 8;
+	ew::MeshData cylinderMeshData = jesseT::createCylinder(cylinderHeight, cylinderRadius, cylinderNumSegments);
+	ew::Mesh cylinderMesh(cylinderMeshData);
 
 	//Initialize transforms
 	ew::Transform cubeTransform;
@@ -93,6 +102,9 @@ int main() {
 	ew::Transform planeTransform;
 	planeTransform.position = ew::Vec3(1.0f, 0.0f, 0.0f);
 
+
+	ew::Transform cylinderTransform;
+	cylinderTransform.position = ew::Vec3(-3.0f, (float)cylinderHeight/2, 0.0f);
 
 	resetCamera(camera,cameraController);
 
@@ -134,6 +146,9 @@ int main() {
 		shader.setMat4("_Model", planeTransform.getModelMatrix());
 		planeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
+		//Draw Cylinder
+		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
+		cylinderMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
 		//Render UI
 		{
