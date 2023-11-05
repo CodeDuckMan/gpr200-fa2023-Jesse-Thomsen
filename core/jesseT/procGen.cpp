@@ -65,16 +65,16 @@ namespace jesseT {
 		ew::Vertex vertex;
 		float topY = (float)height / 2;
 		float bottomY = -topY;
-		int numVerticies = 0;
+		int numVerticies = -1; // start at -1 because 0 will be held for the first vert
 
 		vertex.pos.y = topY;
 		mesh.vertices.push_back(vertex);
 		numVerticies++;
 
 		numVerticies += createCylinderDisc(topY, radius, numSegments, mesh, false);
-		numVerticies += createCylinderDisc(topY, radius, numSegments, mesh, true);
+		numVerticies += createCylinderDisc(topY - 0.3, radius, numSegments, mesh, true);
+		numVerticies += createCylinderDisc(bottomY + 0.3, radius, numSegments, mesh, true);
 		numVerticies += createCylinderDisc(bottomY, radius, numSegments, mesh, false);
-		numVerticies += createCylinderDisc(bottomY, radius, numSegments, mesh, true);
 
 		vertex.pos.y = bottomY;
 		mesh.vertices.push_back(vertex);
@@ -83,9 +83,12 @@ namespace jesseT {
 		int topStartVert = 1;
 		int topCenterVert = 0;
 		int sideStartVert = numSegments + 1;
-		int bottomStartVert = numVerticies;
+		int bottomStartVert = numVerticies - 1 - numSegments;
 		int bottomCenterVert = numVerticies;
+
 		createCylinderDiscIndices(topCenterVert, topStartVert, numSegments, mesh, true);
+
+		createCylinderDiscIndices(bottomCenterVert, bottomStartVert, numSegments, mesh, false);
 
 		return mesh;
 	}
