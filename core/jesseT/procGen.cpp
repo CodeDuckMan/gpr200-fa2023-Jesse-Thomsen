@@ -17,13 +17,14 @@ namespace jesseT {
 			vertex.pos.y = height;
 			if (isFacingout)
 			{
-				vertex.normal = cos(sin(theta));
+				vertex.normal = ew::Vec3(cos(theta), 0.0, sin(theta));
+				vertex.uv = ew::Vec2(cos(sin(theta)),height);
 			}
 			else
 			{
 				vertex.normal = ew::Vec3(0.0, 1.0, 0.0);;
+				vertex.uv = ew::Vec2(vertex.pos.x, vertex.pos.z);
 			}
-			vertex.uv = ew::Vec2(vertex.pos.x, vertex.pos.z);
 			mesh.vertices.push_back(vertex);
 			numVerticesAdded++;
 		}
@@ -54,6 +55,23 @@ namespace jesseT {
 
 	}
 
+	void createCylinderSideIndices(int startVertIndex, int numColumns, ew::MeshData& mesh)
+	{
+		int start;
+		for (size_t i = 0; i < numColumns; i++)
+		{
+			start = startVertIndex + i;
+
+			mesh.indices.push_back(start + numColumns);
+			mesh.indices.push_back(start);
+			mesh.indices.push_back(start + 1);
+
+			mesh.indices.push_back(start + 1);
+			mesh.indices.push_back(start + numColumns + 1);
+			mesh.indices.push_back(start + numColumns);
+		}
+	}
+
 	ew::MeshData createSphere(float radius, int numSegments) {
 		ew::MeshData mesh;
 
@@ -72,8 +90,8 @@ namespace jesseT {
 		numVerticies++;
 
 		numVerticies += createCylinderDisc(topY, radius, numSegments, mesh, false);
-		numVerticies += createCylinderDisc(topY - 0.3, radius, numSegments, mesh, true);
-		numVerticies += createCylinderDisc(bottomY + 0.3, radius, numSegments, mesh, true);
+		numVerticies += createCylinderDisc(topY, radius, numSegments, mesh, true);
+		numVerticies += createCylinderDisc(bottomY, radius, numSegments, mesh, true);
 		numVerticies += createCylinderDisc(bottomY, radius, numSegments, mesh, false);
 
 		vertex.pos.y = bottomY;
@@ -83,11 +101,12 @@ namespace jesseT {
 		int topStartVert = 1;
 		int topCenterVert = 0;
 		int sideStartVert = numSegments + 1;
+		int numColumns = numSegments + 1;
 		int bottomStartVert = numVerticies - 1 - numSegments;
 		int bottomCenterVert = numVerticies;
 
 		createCylinderDiscIndices(topCenterVert, topStartVert, numSegments, mesh, true);
-
+		createCylinderSideIndices(sideStartVert, numColumns, mesh);
 		createCylinderDiscIndices(bottomCenterVert, bottomStartVert, numSegments, mesh, false);
 
 		return mesh;

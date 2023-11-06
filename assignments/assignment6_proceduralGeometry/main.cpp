@@ -34,6 +34,14 @@ struct AppSettings {
 	bool drawAsPoints = false;
 	bool backFaceCulling = true;
 
+	float cubeSize = 0.5;
+
+	float planeSize = 2.0;
+	int planeNumSubdivisions = 5;
+
+	float cylinderRadius = 1.0;
+	float cylinderHeight = 2.0;
+	int cylinderNumSegments = 8;
 	//Euler angles (degrees)
 	ew::Vec3 lightRotation = ew::Vec3(0, 0, 0);
 }appSettings;
@@ -79,32 +87,6 @@ int main() {
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
 
-	//Create cube
-	ew::MeshData cubeMeshData = ew::createCube(0.5f);
-	ew::Mesh cubeMesh(cubeMeshData);
-
-	//Create plane
-	double planeSize = 2.0;
-	int planeNumSubdivisions = 5;
-	ew::MeshData planeMeshData = jesseT::createPlane(planeSize, planeNumSubdivisions);
-	ew::Mesh planeMesh(planeMeshData);
-
-	//Create Cylinder
-	float cylinderRadius = 1.0;
-	float cylinderHeight = 2.0;
-	int cylinderNumSegments = 8;
-	ew::MeshData cylinderMeshData = jesseT::createCylinder(cylinderHeight, cylinderRadius, cylinderNumSegments);
-	ew::Mesh cylinderMesh(cylinderMeshData);
-
-	//Initialize transforms
-	ew::Transform cubeTransform;
-
-	ew::Transform planeTransform;
-	planeTransform.position = ew::Vec3(1.0f, 0.0f, 0.0f);
-
-
-	ew::Transform cylinderTransform;
-	cylinderTransform.position = ew::Vec3(-3.0f, (float)cylinderHeight/2, 0.0f);
 
 	resetCamera(camera,cameraController);
 
@@ -138,13 +120,36 @@ int main() {
 		ew::Vec3 lightF = ew::Vec3(sinf(lightRot.y) * cosf(lightRot.x), sinf(lightRot.x), -cosf(lightRot.y) * cosf(lightRot.x));
 		shader.setVec3("_LightDir", lightF);
 
+
+		//Initialize transforms
+		ew::Transform cubeTransform;
+		cubeTransform.position = ew::Vec3(0.0f, (float)appSettings.cubeSize/2, 0.0f);
+
+		ew::Transform planeTransform;
+		planeTransform.position = ew::Vec3(1.0f, 0.0f, 0.0f);
+
+		ew::Transform cylinderTransform;
+		cylinderTransform.position = ew::Vec3(-3.0f, (float)appSettings.cylinderHeight / 2, 0.0f);
+
+		//Create cube
+		ew::MeshData cubeMeshData = ew::createCube(appSettings.cubeSize);
+		ew::Mesh cubeMesh(cubeMeshData);
+
 		//Draw cube
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
 		cubeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
+		//Create plane
+		ew::MeshData planeMeshData = jesseT::createPlane(appSettings.planeSize, appSettings.planeNumSubdivisions);
+		ew::Mesh planeMesh(planeMeshData);
+
 		//Draw Plane
 		shader.setMat4("_Model", planeTransform.getModelMatrix());
 		planeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
+		//Create Cylinder
+		ew::MeshData cylinderMeshData = jesseT::createCylinder(appSettings.cylinderHeight, appSettings.cylinderRadius, appSettings.cylinderNumSegments);
+		ew::Mesh cylinderMesh(cylinderMeshData);
 
 		//Draw Cylinder
 		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
@@ -192,6 +197,15 @@ int main() {
 				else
 					glDisable(GL_CULL_FACE);
 			}
+			ImGui::DragFloat("Cube Size", &appSettings.cubeSize, 0.1f);
+
+			ImGui::DragFloat("Plane Size", &appSettings.planeSize, 0.1f);
+			ImGui::DragInt("Plane Subdivisions", &appSettings.planeNumSubdivisions, 1);
+			
+			ImGui::DragFloat("Cylinder Radius", &appSettings.cylinderRadius, 0.1f);
+			ImGui::DragFloat("Cylinder Height", &appSettings.cylinderHeight, 0.1f);
+			ImGui::SliderInt("Cylinder Segments", &appSettings.cylinderNumSegments, 1, 50);
+
 			ImGui::End();
 			
 			ImGui::Render();
