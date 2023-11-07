@@ -42,6 +42,9 @@ struct AppSettings {
 	float cylinderRadius = 1.0;
 	float cylinderHeight = 2.0;
 	int cylinderNumSegments = 8;
+
+	float circleRadius = 2.0;
+	int circleNumSegments = 10;
 	//Euler angles (degrees)
 	ew::Vec3 lightRotation = ew::Vec3(0, 0, 0);
 }appSettings;
@@ -131,6 +134,8 @@ int main() {
 		ew::Transform cylinderTransform;
 		cylinderTransform.position = ew::Vec3(-3.0f, (float)appSettings.cylinderHeight / 2, 0.0f);
 
+		ew::Transform circleTransform;
+		circleTransform.position = ew::Vec3(-10.0f, (float)appSettings.circleRadius / 2, 0.0f);
 		//Create cube
 		ew::MeshData cubeMeshData = ew::createCube(appSettings.cubeSize);
 		ew::Mesh cubeMesh(cubeMeshData);
@@ -154,6 +159,14 @@ int main() {
 		//Draw Cylinder
 		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
 		cylinderMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+
+		//Create Cirlce
+		ew::MeshData circleMeshData = jesseT::createSphere(appSettings.circleRadius, appSettings.circleNumSegments);
+		ew::Mesh circleMesh(circleMeshData);
+
+		//Draw Circle
+		shader.setMat4("_Model", circleTransform.getModelMatrix());
+		circleMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
 		//Render UI
 		{
@@ -197,15 +210,27 @@ int main() {
 				else
 					glDisable(GL_CULL_FACE);
 			}
-			ImGui::DragFloat("Cube Size", &appSettings.cubeSize, 0.1f);
 
-			ImGui::DragFloat("Plane Size", &appSettings.planeSize, 0.1f);
-			ImGui::DragInt("Plane Subdivisions", &appSettings.planeNumSubdivisions, 1);
-			
-			ImGui::DragFloat("Cylinder Radius", &appSettings.cylinderRadius, 0.1f);
-			ImGui::DragFloat("Cylinder Height", &appSettings.cylinderHeight, 0.1f);
-			ImGui::SliderInt("Cylinder Segments", &appSettings.cylinderNumSegments, 1, 50);
+			if (ImGui::CollapsingHeader("Cube")) 
+			{
+				ImGui::DragFloat("Cube Size", &appSettings.cubeSize, 0.1f);
+			}
 
+			if (ImGui::CollapsingHeader("Plane")) {
+				ImGui::DragFloat("Plane Size", &appSettings.planeSize, 0.1f);
+				ImGui::DragInt("Plane Subdivisions", &appSettings.planeNumSubdivisions, 1);
+			}
+
+			if (ImGui::CollapsingHeader("Cilinder")) {
+				ImGui::DragFloat("Cylinder Radius", &appSettings.cylinderRadius, 0.1f);
+				ImGui::DragFloat("Cylinder Height", &appSettings.cylinderHeight, 0.1f);
+				ImGui::SliderInt("Cylinder Segments", &appSettings.cylinderNumSegments, 1, 50);
+			}
+
+			if (ImGui::CollapsingHeader("Circle")) {
+				ImGui::DragFloat("Circle Height", &appSettings.circleRadius, 0.1f);
+				ImGui::SliderInt("Circle Segments", &appSettings.circleNumSegments, 1, 50);
+			}
 			ImGui::End();
 			
 			ImGui::Render();

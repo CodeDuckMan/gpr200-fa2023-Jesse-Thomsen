@@ -17,8 +17,16 @@ namespace jesseT {
 			vertex.pos.y = height;
 			if (isFacingout)
 			{
-				vertex.normal = ew::Vec3(cos(theta), 0.0, sin(theta));
-				vertex.uv = ew::Vec2(cos(sin(theta)),height);
+				if (height >=0)
+				{
+					vertex.normal = ew::Vec3(cos(theta), 0.0, sin(theta));
+					vertex.uv = ew::Vec2((float)i / numSegments,1);
+				}
+				else 
+				{
+					vertex.normal = ew::Vec3(cos(theta), 0.0, sin(theta));
+					vertex.uv = ew::Vec2((float)i / numSegments, 0);
+				}
 			}
 			else
 			{
@@ -72,8 +80,94 @@ namespace jesseT {
 		}
 	}
 
+	int createCircleVertices(int numSegments, float radius, ew::MeshData& mesh)
+	{
+		ew::Vertex vertex;
+		int numVerticesAdded = 0;
+		float phi = 0;
+		float theta = 0;
+		float thetaStep = (float)2 * ew::PI / numSegments;
+		float phiStep = (float)ew::PI / numSegments;
+
+		for (int row = 0; row <= numSegments; row++)
+		{
+			phi = row * phiStep;
+			for (int col = 0; col <= numSegments; col++)
+			{
+				theta = col * thetaStep;
+				vertex.pos.x = radius * cos(theta) * sin(phi);
+				vertex.pos.y = radius * cos(phi);
+				vertex.pos.z = radius * sin(theta) * sin(phi);
+				vertex.normal = ew::Vec3(vertex.pos.x, vertex.pos.y, vertex.pos.z);
+				vertex.uv = ew::Vec2((float)col / numSegments, (float)row / numSegments);
+				mesh.vertices.push_back(vertex);
+				numVerticesAdded++;
+			}
+		}
+		return numVerticesAdded;
+	}
+
+	void createCircleCapIndices(int centerStartVertIndex, int sideStartVertIndex, int numSegments, ew::MeshData& mesh, bool isTop)
+	{
+		if (isTop)
+		{
+			for (int i = 0; i < numSegments; i++)
+			{
+				mesh.indices.push_back(sideStartVertIndex + i);
+				mesh.indices.push_back(centerStartVertIndex + i);
+				mesh.indices.push_back(sideStartVertIndex + i + 1);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < numSegments; i++)
+			{
+				mesh.indices.push_back(sideStartVertIndex - i);	
+				mesh.indices.push_back(centerStartVertIndex - i);
+				mesh.indices.push_back(sideStartVertIndex - i - 1);
+			}
+
+		}
+	}
+
+	void createCircleSideIndices(int startVertIndex, int numSegments, ew::MeshData& mesh)
+	{
+		int start = 0;
+		int columns = numSegments + 1;
+
+		for (int row = 1; row < numSegments - 1; row++)
+		{
+			for (int col = 0; col < numSegments; col++)
+			{
+				start = (float)row * columns + col;
+
+				mesh.indices.push_back(start);
+				mesh.indices.push_back(start + 1);
+				mesh.indices.push_back(start + columns);
+
+
+				mesh.indices.push_back(start + columns);
+				mesh.indices.push_back(start + 1);
+				mesh.indices.push_back(start + columns + 1);
+			}
+		}
+	}
+
+
+
 	ew::MeshData createSphere(float radius, int numSegments) {
 		ew::MeshData mesh;
+		ew::Vertex vertex;
+		float topY = (float)radius;
+		float bottomY = -topY;
+		int numVerticies = -1; // start at -1 because 0 will be held for the first vert
+		int sideStartVertex = (numSegments * 2) - 1;
+
+		numVerticies += createCircleVertices(numSegments, radius, mesh);
+		
+		createCircleCapIndices(0,numSegments + 1,numSegments,mesh,true);
+		createCircleSideIndices(sideStartVertex,numSegments,mesh);
+		createCircleCapIndices(numVerticies, numVerticies - numSegments - 1, numSegments, mesh, false);
 
 		return mesh;
 	}
@@ -124,7 +218,7 @@ namespace jesseT {
 				vertex.pos.x = size * ((float)col / subdivisions);
 				vertex.pos.z = -size * ((float)row / subdivisions);
 				vertex.normal = ew::Vec3 (0.0, 1.0, 0.0);;
-				vertex.uv = ew::Vec2(col, row);
+				vertex.uv = ew::Vec2(col/(float)subdivisions, row / (float)subdivisions);
 				mesh.vertices.push_back(vertex);
 			}
 		}
