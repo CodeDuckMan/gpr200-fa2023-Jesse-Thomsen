@@ -27,6 +27,17 @@ ew::Vec3 bgColor = ew::Vec3(0.1f);
 ew::Camera camera;
 ew::CameraController cameraController;
 
+struct Light {
+	ew::Vec3 position = (0.0, 5.0, 0.0);
+	ew::Vec3 color; //RGB
+};
+
+struct Material {
+	float ambientK;// (0-1)
+	float diffuseK;// (0-1)
+	float specular;// (0-1)
+	float shininess;// (0-1)
+};
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -72,10 +83,11 @@ int main() {
 	ew::Transform planeTransform;
 	ew::Transform sphereTransform;
 	ew::Transform cylinderTransform;
+	ew::Transform lightTransform;
 	planeTransform.position = ew::Vec3(0, -1.0, 0);
 	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
 	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
-
+	lightTransform.position = ew::Vec3(0.0, 5.0, 0.0);
 	resetCamera(camera,cameraController);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -112,6 +124,9 @@ int main() {
 		cylinderMesh.draw();
 
 		//TODO: Render point lights
+
+		shader.setMat4("_Color", lightTransform.getModelMatrix());
+		sphereMesh.draw();
 
 		//Render UI
 		{
