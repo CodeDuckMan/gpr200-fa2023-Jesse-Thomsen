@@ -20,13 +20,13 @@ uniform Light _Lights[MAX_LIGHTS];
 
 struct Material {
 	float ambientK;// (0-1)
-	float diffuseK;// (0-1)
+	float diffuseK;// (0-1)	
 	float specular;// (0-1)
 	float shininess;// (0-1)
 };
 uniform Material _Material;
 
-uniform vec3 camerapose;
+uniform vec3 _Camerapose;
 
 void main(){
 	vec3 normal = normalize(fs_in.WorldNormal);
@@ -34,10 +34,14 @@ void main(){
 	
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
+		
 		vec3 w = normalize(_Lights[i].position - fs_in.WorldPosition);
-		vec3 v = normalize(camerapose - fs_in.WorldPosition);
-		vec3 halfV = normalize((w + v) / (w + v).length());
-		lightColor = _Lights[i].color * _Material.diffuseK * max(dot(w, normal),0) + halfV;
+		vec3 v = normalize(_Camerapose - fs_in.WorldPosition);
+		vec3 h = normalize((w + v)); // half vector
+		vec3 specular  = _Lights[i].color * pow(max(dot(h,normal),0),_Material.shininess);
+		vec3 diffuse = _Lights[i].color * _Material.diffuseK * max(dot(w, normal),0);
+		lightColor += diffuse + specular;
 	}
-	FragColor = texture(_Texture,fs_in.UV);
+	vec3 finalColor = texture(_Texture,fs_in.UV).rgb * lightColor;
+	FragColor = vec4(finalColor, 1);
 }

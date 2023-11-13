@@ -28,15 +28,15 @@ ew::Camera camera;
 ew::CameraController cameraController;
 
 struct Light {
-	ew::Vec3 position = (0.0, 5.0, 0.0);
-	ew::Vec3 color; //RGB
+	ew::Vec3 position = ew::Vec3(0.0, 5.0, 0.0);
+	ew::Vec3 color = ew::Vec3(1.0,0.0,1.0); //RGB
 };
 
 struct Material {
-	float ambientK;// (0-1)
-	float diffuseK;// (0-1)
-	float specular;// (0-1)
-	float shininess;// (0-1)
+	float ambientK  = (float)0.2;// (0-1)
+	float diffuseK  = (float)0.5;// (0-1)
+	float specular  = (float)0.2;// (0-1)
+	float shininess = (float)128.0;// (0-1)
 };
 int main() {
 	printf("Initializing...");
@@ -72,11 +72,20 @@ int main() {
 	ew::Shader shader("assets/defaultLit.vert", "assets/defaultLit.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
 
-	//Create cube
+	ew::Shader unlitShader("assets/unlit.vert", "assets/unlit.frag");
+
+	//Create Meshes
 	ew::Mesh cubeMesh(ew::createCube(1.0f));
 	ew::Mesh planeMesh(ew::createPlane(5.0f, 5.0f, 10));
 	ew::Mesh sphereMesh(ew::createSphere(0.5f, 64));
 	ew::Mesh cylinderMesh(ew::createCylinder(0.5f, 1.0f, 32));
+
+	ew::Mesh lightMesh(ew::createSphere(0.2f, 64));
+	
+	//Initialize lights
+	Light light1;
+	Material material1;
+
 
 	//Initialize transforms
 	ew::Transform cubeTransform;
@@ -87,7 +96,9 @@ int main() {
 	planeTransform.position = ew::Vec3(0, -1.0, 0);
 	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
 	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
-	lightTransform.position = ew::Vec3(0.0, 5.0, 0.0);
+
+	lightTransform.position = light1.position;
+	
 	resetCamera(camera,cameraController);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -124,9 +135,20 @@ int main() {
 		cylinderMesh.draw();
 
 		//TODO: Render point lights
+		shader.setVec3("_Camerapose", camera.position);
+		shader.setVec3("_Lights[0].color", light1.color);
+		shader.setVec3("_Lights[0].position", light1.position);
+		shader.setFloat("_Material.ambientK", material1.ambientK);
+		shader.setFloat("_Material.diffuseK", material1.diffuseK);
+		shader.setFloat("_Material.specular", material1.specular);
+		shader.setFloat("_Material.shininess", material1.shininess);
 
-		shader.setMat4("_Color", lightTransform.getModelMatrix());
-		sphereMesh.draw();
+		unlitShader.use();
+		unlitShader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
+		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
+		unlitShader.setVec3("_Color", light1.color);
+
+		lightMesh.draw();
 
 		//Render UI
 		{
