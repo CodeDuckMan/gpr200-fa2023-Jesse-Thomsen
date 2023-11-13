@@ -84,9 +84,12 @@ int main() {
 	
 	//Initialize lights
 	Light light1;
+	const int MAX_LIGHTS = 4;
+	Light lights[MAX_LIGHTS];
 	Material material1;
 
-
+	bool rotateLights = false;
+	float rotateLightsDistance = 3.0;
 	//Initialize transforms
 	ew::Transform cubeTransform;
 	ew::Transform planeTransform;
@@ -137,7 +140,7 @@ int main() {
 		//TODO: Render point lights
 		shader.setVec3("_Camerapose", camera.position);
 		shader.setVec3("_Lights[0].color", light1.color);
-		shader.setVec3("_Lights[0].position", light1.position);
+		shader.setVec3("_Lights[0].position", lightTransform.position);
 		shader.setFloat("_Material.ambientK", material1.ambientK);
 		shader.setFloat("_Material.diffuseK", material1.diffuseK);
 		shader.setFloat("_Material.specular", material1.specular);
@@ -175,8 +178,24 @@ int main() {
 					resetCamera(camera, cameraController);
 				}
 			}
-
 			ImGui::ColorEdit3("BG color", &bgColor.x);
+
+			ImGui::Checkbox("Rotate Lights Above", &rotateLights);
+			if (rotateLights) {
+				ImGui::DragFloat("Rotate Lights Distance", &rotateLightsDistance, 0.1f);
+				lightTransform.position.x = sin(time)* rotateLightsDistance;
+				lightTransform.position.z = cos(time)* rotateLightsDistance;
+			}
+			else
+			{
+				ImGui::DragFloat3("LightPosition", &lightTransform.position.x, 0.1f);
+			}
+			ImGui::DragFloat("Material ambientK", &material1.ambientK, 0.01f);
+			ImGui::DragFloat("Material diffuseK", &material1.diffuseK, 0.01f);
+			ImGui::DragFloat("Material specular", &material1.specular, 0.01f);
+			ImGui::DragFloat("Material shininess", &material1.shininess, 1.0f);
+			ImGui::ColorEdit3("Light color", &light1.color.x);
+
 			ImGui::End();
 			
 			ImGui::Render();

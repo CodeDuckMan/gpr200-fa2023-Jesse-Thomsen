@@ -38,9 +38,10 @@ void main(){
 		vec3 w = normalize(_Lights[i].position - fs_in.WorldPosition);
 		vec3 v = normalize(_Camerapose - fs_in.WorldPosition);
 		vec3 h = normalize((w + v)); // half vector
-		vec3 specular  = _Lights[i].color * pow(max(dot(h,normal),0),_Material.shininess);
+		vec3 specular  = _Lights[i].color * pow(max(dot(h,normal),0),_Material.shininess * _Material.specular);
 		vec3 diffuse = _Lights[i].color * _Material.diffuseK * max(dot(w, normal),0);
-		lightColor += diffuse + specular;
+		vec3 ambient = _Lights[i].color * _Material.ambientK;
+		lightColor += ambient + diffuse + specular;
 	}
 	vec3 finalColor = texture(_Texture,fs_in.UV).rgb * lightColor;
 	FragColor = vec4(finalColor, 1);
