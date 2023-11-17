@@ -16,7 +16,7 @@ struct Light
 };
 #define MAX_LIGHTS 10
 uniform Light _Lights[MAX_LIGHTS];
-
+uniform int _numLights;
 
 struct Material {
 	float ambientK;// (0-1)
@@ -32,7 +32,7 @@ void main(){
 	vec3 normal = normalize(fs_in.WorldNormal);
 	vec3 lightColor = vec3(0.0,0.0,0.0);
 
-	for (int i = 0; i < MAX_LIGHTS; i++)
+	for (int i = 0; i < _numLights; i++)
 	{
 		
 		vec3 w = normalize(_Lights[i].position - fs_in.WorldPosition);

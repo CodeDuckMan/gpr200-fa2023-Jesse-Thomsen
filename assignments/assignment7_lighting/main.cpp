@@ -146,6 +146,7 @@ int main() {
 		cylinderMesh.draw();
 
 		// Render point lights
+		shader.setInt("_numLights", numLights);
 		shader.setVec3("_Camerapose", camera.position);
 		shader.setFloat("_Material.ambientK", material1.ambientK);
 		shader.setFloat("_Material.diffuseK", material1.diffuseK);
