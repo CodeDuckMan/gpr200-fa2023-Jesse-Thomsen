@@ -18,7 +18,7 @@ IF(IMGUI_ADDED)
             PRIVATE
             ${IMGUI_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
             ${IMGUI_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
-            )
+             "../assignments/scratch/main.cpp")
     target_include_directories( IMGUI
             PUBLIC ${IMGUI_SOURCE_DIR}
             PUBLIC ${IMGUI_SOURCE_DIR}/backends
