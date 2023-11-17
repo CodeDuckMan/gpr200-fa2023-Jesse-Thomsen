@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <string>
 
 #include <ew/external/glad.h>
 #include <ew/ewMath/ewMath.h>
@@ -83,24 +84,31 @@ int main() {
 	ew::Mesh lightMesh(ew::createSphere(0.2f, 64));
 	
 	//Initialize lights
-	Light light1;
-	const int MAX_LIGHTS = 4;
+	bool rotateLights = false;
+	const int MAX_LIGHTS = 10; // remember to change in fragment shader when changing max lights
+	int numLights = 1;
+	float rotateLightsDistance = 3.0;
 	Light lights[MAX_LIGHTS];
 	Material material1;
 
-	bool rotateLights = false;
-	float rotateLightsDistance = 3.0;
+	for (auto i = 0; i < MAX_LIGHTS; i++)
+	{
+		lights[i].position = ew::Vec3(-3.0 + i, 5.0, 0.0);
+	}
 	//Initialize transforms
 	ew::Transform cubeTransform;
 	ew::Transform planeTransform;
 	ew::Transform sphereTransform;
 	ew::Transform cylinderTransform;
-	ew::Transform lightTransform;
+	ew::Transform lightsTransform[MAX_LIGHTS];
 	planeTransform.position = ew::Vec3(0, -1.0, 0);
 	sphereTransform.position = ew::Vec3(-1.5f, 0.0f, 0.0f);
 	cylinderTransform.position = ew::Vec3(1.5f, 0.0f, 0.0f);
 
-	lightTransform.position = light1.position;
+	for (auto i = 0; i < MAX_LIGHTS; i++)
+	{
+		lightsTransform[i].position = lights[i].position;
+	}
 	
 	resetCamera(camera,cameraController);
 
@@ -137,21 +145,31 @@ int main() {
 		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
 		cylinderMesh.draw();
 
-		//TODO: Render point lights
+		// Render point lights
 		shader.setVec3("_Camerapose", camera.position);
-		shader.setVec3("_Lights[0].color", light1.color);
-		shader.setVec3("_Lights[0].position", lightTransform.position);
 		shader.setFloat("_Material.ambientK", material1.ambientK);
 		shader.setFloat("_Material.diffuseK", material1.diffuseK);
 		shader.setFloat("_Material.specular", material1.specular);
 		shader.setFloat("_Material.shininess", material1.shininess);
 
-		unlitShader.use();
-		unlitShader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
-		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
-		unlitShader.setVec3("_Color", light1.color);
+		for (auto i = 0; i < numLights; i++)
+		{
+			lights[i].position = lightsTransform[i].position;
+			shader.setVec3("_Lights[" + std::to_string(i) + "].color", lights[i].color);
+			shader.setVec3("_Lights[" + std::to_string(i) + "].position", lights[i].position);
 
-		lightMesh.draw();
+		}
+			unlitShader.use();
+			unlitShader.setMat4("_ViewProjection", camera.ProjectionMatrix() * camera.ViewMatrix());
+
+		for (auto i = 0; i < numLights; i++)
+		{
+			unlitShader.setMat4("_Model", lightsTransform[i].getModelMatrix());
+			unlitShader.setVec3("_Color", lights[i].color);
+			lightMesh.draw();
+
+		}
+
 
 		//Render UI
 		{
@@ -183,19 +201,30 @@ int main() {
 			ImGui::Checkbox("Rotate Lights Above", &rotateLights);
 			if (rotateLights) {
 				ImGui::DragFloat("Rotate Lights Distance", &rotateLightsDistance, 0.1f);
-				lightTransform.position.x = sin(time)* rotateLightsDistance;
-				lightTransform.position.z = cos(time)* rotateLightsDistance;
+				float thetaStep = ew::TAU / (numLights);
+				for (auto i = 0; i < numLights; i++)
+				{
+					float theta = i * thetaStep;
+					float cosA = cosf(theta + time);
+					float sinA = sinf(theta + time);
+					lightsTransform[i].position.x = cosA * rotateLightsDistance;
+					lightsTransform[i].position.z = sinA * rotateLightsDistance;
+				}
 			}
-			else
-			{
-				ImGui::DragFloat3("LightPosition", &lightTransform.position.x, 0.1f);
+			ImGui::SliderInt("Number of Lights", &numLights, 0, MAX_LIGHTS);
+			for (auto i = 0; i < numLights; i++)
+				{
+				if (ImGui::CollapsingHeader(("Light " + std::to_string(i + 1)).c_str())) {
+					ImGui::DragFloat3("Light Position", &lightsTransform[i].position.x, 0.1f);
+					ImGui::ColorEdit3("Light Color", &lights[i].color.x);
+				}
 			}
+			
 			ImGui::DragFloat("Material ambientK", &material1.ambientK, 0.01f);
 			ImGui::DragFloat("Material diffuseK", &material1.diffuseK, 0.01f);
 			ImGui::DragFloat("Material specular", &material1.specular, 0.01f);
 			ImGui::DragFloat("Material shininess", &material1.shininess, 1.0f);
-			ImGui::ColorEdit3("Light color", &light1.color.x);
-
+			
 			ImGui::End();
 			
 			ImGui::Render();

@@ -14,7 +14,7 @@ struct Light
 	vec3 position;
 	vec3 color;
 };
-#define MAX_LIGHTS 4
+#define MAX_LIGHTS 10
 uniform Light _Lights[MAX_LIGHTS];
 
 
@@ -31,7 +31,7 @@ uniform vec3 _Camerapose;
 void main(){
 	vec3 normal = normalize(fs_in.WorldNormal);
 	vec3 lightColor = vec3(0.0,0.0,0.0);
-	
+
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
 		
